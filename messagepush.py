@@ -4,15 +4,24 @@ import subprocess
 import time
 import dlistFile
 
-def messagePush(message):
-    systemMessage(message)
+messageIndex = {}
+
+def messagePush(roomid,message):
+    systemMessage(roomid,message)
     shellMessage(message)
     pass
 
-def systemMessage(message):
+def systemMessage(roomid,message):
     notify2.init("弹幕姬")
     dlistPush = notify2.Notification("弹幕姬",message)
     dlistPush.show()
+    if message in messageIndex.keys():
+        messageIndex[message] = int(messageIndex[message]) + 1
+    else:
+        messageIndex[message] = 0
+    while messageIndex[message] == 20:
+        messageIndex[message] = 0
+        dlistFile.removeDlistKey(roomid,message)
     pass
 
 def shellMessage(message):
@@ -32,10 +41,14 @@ def dlistsay(roomid):
             for i in range(dlistMax-10, dlistMax):
                 dlistStrList.append(dlist[i])
             dlistStr = '\n'.join(dlistStrList)
-            print(dlistStr)
-            messagePush(dlistStr)
+            messagePush(roomid,dlistStr)
+        elif dlistMax >=50:
+            for i in range(dlistMax-10, dlistMax):
+                dlistStrList.append(dlist[i])
+            dlistStr = '\n'.join(dlistStrList)
+            dlistFile.removerDlist(roomid)
+            messagePush(roomid,dlistStr)
         else:
             dlistStr = '\n'.join(dlist)
-            print(dlistStr)
-            messagePush(dlistStr)
+            messagePush(roomid,dlistStr)
     pass

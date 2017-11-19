@@ -26,3 +26,19 @@ def readDist(roomid):
     else:
         open(filePath,'w')
     pass
+
+def removeDlistKey(roomid,message):
+    messageList = readDist(roomid)
+    listMax = len(messageList)
+    removerDlist(roomid)
+    for i in range(0,listMax):
+        strMessage = messageList[i]
+        while strMessage != message:
+            writeDlist(message,roomid)
+    pass
+
+def removerDlist(roomid):
+    baseDir = os.path.dirname(__file__)
+    filePath = os.path.join(baseDir, 'dlistData', str(roomid))
+    os.remove(filePath)
+    pass
