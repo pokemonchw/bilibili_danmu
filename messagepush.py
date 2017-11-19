@@ -11,10 +11,8 @@ def messagePush(message):
 
 def systemMessage(message):
     notify2.init("弹幕姬")
-    earthMonitorPush = notify2.Notification("弹幕姬",message)
-    earthMonitorPush.set_hint("x",10)
-    earthMonitorPush.set_hint("y",10)
-    earthMonitorPush.show()
+    dlistPush = notify2.Notification("弹幕姬",message)
+    dlistPush.show()
     pass
 
 def shellMessage(message):
@@ -23,14 +21,21 @@ def shellMessage(message):
 
 def dlistsay(roomid):
     dlist = dlistFile.readDist(roomid)
-    dlistMax = len(dlist)
-    dlistStr = ""
-    if dlistMax >= 20:
-        for i in range(dlistMax - 20,dlistMax):
-            dlistStr = dlistStr + dlist[i]
+    try:
+        dlistMax = len(dlist)
+    except TypeError:
+        pass
     else:
-        for i in range(0,dlistMax):
-            dlistStr = dlistStr + dlist[i]
-    messagePush(dlistStr)
-    time.sleep(10)
+        dlistStr = ""
+        dlistStrList = []
+        if dlistMax >= 10:
+            for i in range(dlistMax-10, dlistMax):
+                dlistStrList.append(dlist[i])
+            dlistStr = '\n'.join(dlistStrList)
+            print(dlistStr)
+            messagePush(dlistStr)
+        else:
+            dlistStr = '\n'.join(dlist)
+            print(dlistStr)
+            messagePush(dlistStr)
     pass

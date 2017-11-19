@@ -2,11 +2,11 @@ import asyncio
 import aiohttp
 import xml.dom.minidom
 import random
-from struct import *
 import json
+from struct import *
 import threading
 import time
-
+import json
 import config
 import re
 import messagepush
@@ -28,31 +28,23 @@ class bilibiliClient():
         self._roomId = int(self._roomId)
 
     async def connectServer(self):
-        messagepush.messagePush ('正在进入房间。。。。。')
+        print ('正在进入房间。。。。。')
         with aiohttp.ClientSession() as s:
-            async with s.get('http://live.bilibili.com/' + str(self._roomId)) as r:
-                html = await r.text()
-                m = re.findall(r'ROOMID\s=\s(\d+)', html)
-                ROOMID = m[0]
-            self._roomId = int(ROOMID)
-            async with s.get(self._CIDInfoUrl + ROOMID) as r:
+            async with s.get(self._CIDInfoUrl + str(self._roomId)) as r:
                 xml_string = '<root>' + await r.text() + '</root>'
                 dom = xml.dom.minidom.parseString(xml_string)
                 root = dom.documentElement
                 server = root.getElementsByTagName('server')
                 self._ChatHost = server[0].firstChild.data
-
-
-
         reader, writer = await asyncio.open_connection(self._ChatHost, self._ChatPort)
         self._reader = reader
         self._writer = writer
-        messagepush.messagePush ('链接弹幕中。。。。。')
+        print ('链接弹幕中。。。。。')
         if (await self.SendJoinChannel(self._roomId) == True):
             self.connected = True
-            messagepush.messagePush ('进入房间成功。。。。。')
-            messagepush.messagePush ('链接弹幕成功。。。。。')
-            tA = threading.Thread(target=self.dlistMessagePush())
+            print ('进入房间成功。。。。。')
+            print ('链接弹幕成功。。。。。')
+            tA = threading.Thread(target=self.dlistMessagePush)
             tA.start()
             await self.ReceiveMessageLoop()
 
@@ -99,7 +91,7 @@ class bilibiliClient():
                 if num==0 or num==1 or num==2:
                     tmp = await self._reader.read(4)
                     num3, = unpack('!I', tmp)
-                    messagepush.messagePush ('房间人数为 %s' % num3)
+                    print ('房间人数为 %s' % num3)
                     self._UserCount = num3
                     continue
                 elif num==3 or num==4:
@@ -127,10 +119,10 @@ class bilibiliClient():
             return
         cmd = dic['cmd']
         if cmd == 'LIVE':
-            messagepush.messagePush ('直播开始。。。')
+            print ('直播开始。。。')
             return
         if cmd == 'PREPARING':
-            messagepush.messagePush ('房主准备中。。。')
+            print ('房主准备中。。。')
             return
         if cmd == 'DANMU_MSG':
             commentText = dic['info'][1]
@@ -143,7 +135,7 @@ class bilibiliClient():
             if isVIP:
                 commentUser = 'VIP ' + commentUser
             try:
-                danmu = commentUser + ' say: ' + commentText + ":" + date + " \n"
+                danmu = commentUser + ':' + 'say: ' + commentText + " \n"
                 dlistFile.writeDlist(danmu, self._roomId)
             except:
                 pass
@@ -154,14 +146,14 @@ class bilibiliClient():
             Giftrcost = dic['data']['rcost']
             GiftNum = dic['data']['num']
             try:
-                messagepush.messagePush(GiftUser + ' 送出了 ' + str(GiftNum) + ' 个 ' + GiftName)
+                print(GiftUser + ' 送出了 ' + str(GiftNum) + ' 个 ' + GiftName)
             except:
                 pass
             return
         if cmd == 'WELCOME' and config.TURN_WELCOME == 1:
             commentUser = dic['data']['uname']
             try:
-                messagepush.messagePush ('欢迎 ' + commentUser + ' 进入房间。。。。')
+                print ('欢迎 ' + commentUser + ' 进入房间。。。。')
             except:
                 pass
             return
@@ -169,6 +161,6 @@ class bilibiliClient():
 
     def dlistMessagePush(self):
         messagepush.dlistsay(self._roomId)
-        time.time(10)
+        time.sleep(10)
         self.dlistMessagePush()
         pass
