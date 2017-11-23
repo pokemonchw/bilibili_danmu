@@ -13,8 +13,11 @@ def messagePush(roomid,message):
 
 def systemMessage(roomid,message):
     notify2.init("弹幕姬")
-    dlistPush = notify2.Notification("弹幕姬",message)
-    dlistPush.show()
+    if len(message) >= 10:
+        dlistPush = notify2.Notification("弹幕姬", message)
+        dlistPush.show()
+    else:
+        pass
     if message in messageIndex.keys():
         messageIndex[message] = int(messageIndex[message]) + 1
     else:
@@ -48,6 +51,8 @@ def dlistsay(roomid):
             dlistStr = '\n'.join(dlistStrList)
             dlistFile.removerDlist(roomid)
             messagePush(roomid,dlistStr)
+        elif dlistMax < 0:
+            pass
         else:
             dlistStr = '\n'.join(dlist)
             messagePush(roomid,dlistStr)
