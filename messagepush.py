@@ -7,17 +7,17 @@ import dlistFile
 messageIndex = {}
 
 def messagePush(roomid,message):
-    systemMessage(roomid,message)
-    shellMessage(message)
+    if len(message) >= 10:
+        systemMessage(roomid, message)
+        shellMessage(message)
+    else:
+        pass
     pass
 
 def systemMessage(roomid,message):
     notify2.init("弹幕姬")
-    if len(message) >= 10:
-        dlistPush = notify2.Notification("弹幕姬", message)
-        dlistPush.show()
-    else:
-        pass
+    dlistPush = notify2.Notification("弹幕姬", message)
+    dlistPush.show()
     if message in messageIndex.keys():
         messageIndex[message] = int(messageIndex[message]) + 1
     else:

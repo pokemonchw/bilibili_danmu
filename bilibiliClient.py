@@ -29,6 +29,7 @@ class bilibiliClient():
 
     async def connectServer(self):
         print ('正在进入房间。。。。。')
+        dlistFile.removerDlist(self._roomId)
         with aiohttp.ClientSession() as s:
             async with s.get(self._CIDInfoUrl + str(self._roomId)) as r:
                 xml_string = '<root>' + await r.text() + '</root>'
