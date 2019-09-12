@@ -2,58 +2,32 @@
 import notify2
 import subprocess
 import time
-import dlistFile
+import CacheContorl
 
-messageIndex = {}
 
-def messagePush(roomid,message):
-    if len(message) >= 10:
-        systemMessage(roomid, message)
-        shellMessage(message)
-    else:
-        pass
-    pass
+notify2.init("弹幕姬")
+dlistPush = notify2.Notification("弹幕姬", '弹幕姬启动完成')
 
-def systemMessage(roomid,message):
-    notify2.init("弹幕姬")
-    dlistPush = notify2.Notification("弹幕姬", message)
+def systemMessage(message):
+    dlistPush.update('弹幕姬',message)
     dlistPush.show()
-    if message in messageIndex.keys():
-        messageIndex[message] = int(messageIndex[message]) + 1
-    else:
-        messageIndex[message] = 0
-    while messageIndex[message] == 20:
-        messageIndex[message] = 0
-        dlistFile.removeDlistKey(roomid,message)
-    pass
 
 def shellMessage(message):
     subprocess.call("echo '弹幕姬 \n" + message + "'", shell=True)
-    pass
 
-def dlistsay(roomid):
-    dlist = dlistFile.readDist(roomid)
-    try:
-        dlistMax = len(dlist)
-    except TypeError:
-        pass
-    else:
-        dlistStr = ""
-        dlistStrList = []
-        if dlistMax >= 10:
-            for i in range(dlistMax-10, dlistMax):
-                dlistStrList.append(dlist[i])
-            dlistStr = '\n'.join(dlistStrList)
-            messagePush(roomid,dlistStr)
-        elif dlistMax >=50:
-            for i in range(dlistMax-10, dlistMax):
-                dlistStrList.append(dlist[i])
-            dlistStr = '\n'.join(dlistStrList)
-            dlistFile.removerDlist(roomid)
-            messagePush(roomid,dlistStr)
-        elif dlistMax < 0:
-            pass
-        else:
-            dlistStr = '\n'.join(dlist)
-            messagePush(roomid,dlistStr)
-    pass
+def dlistsay():
+    while(len(CacheContorl.message_data.keys()) >= 9):
+        del CacheContorl.message_data[list(CacheContorl.message_data.keys())[0]]
+    messageStr = ''
+    messageShellStr = ''
+    for message in CacheContorl.message_data:
+        messageStr += message + '\n'
+        if CacheContorl.message_data[message] == 0:
+            messageShellStr += message + '\n'
+        CacheContorl.message_data[message] += 1
+        if CacheContorl.message_data[message] >= 199:
+            del CacheContorl.message_data[message]
+    if messageStr != '':
+        systemMessage(messageStr)
+    if messageShellStr != '':
+        shellMessage(messageShellStr)

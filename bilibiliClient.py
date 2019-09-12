@@ -10,7 +10,7 @@ import json
 import config
 import re
 import messagepush
-import dlistFile
+import CacheContorl
 
 class bilibiliClient():
     def __init__(self):
@@ -29,14 +29,6 @@ class bilibiliClient():
 
     async def connectServer(self):
         print ('正在进入房间。。。。。')
-        dlistFile.removerDlist(self._roomId)
-        with aiohttp.ClientSession() as s:
-            async with s.get(self._CIDInfoUrl + str(self._roomId)) as r:
-                xml_string = '<root>' + await r.text() + '</root>'
-                dom = xml.dom.minidom.parseString(xml_string)
-                root = dom.documentElement
-                server = root.getElementsByTagName('server')
-                self._ChatHost = server[0].firstChild.data
         reader, writer = await asyncio.open_connection(self._ChatHost, self._ChatPort)
         self._reader = reader
         self._writer = writer
@@ -137,7 +129,7 @@ class bilibiliClient():
                 commentUser = 'VIP ' + commentUser
             try:
                 danmu = commentUser + ':' + 'say: ' + commentText + " \n"
-                dlistFile.writeDlist(danmu, self._roomId)
+                CacheContorl.message_data[danmu] = 0
             except:
                 pass
             return
@@ -161,7 +153,6 @@ class bilibiliClient():
         return
 
     def dlistMessagePush(self):
-        messagepush.dlistsay(self._roomId)
-        time.sleep(10)
-        self.dlistMessagePush()
-        pass
+        while(True):
+            messagepush.dlistsay()
+            time.sleep(1)
