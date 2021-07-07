@@ -93,9 +93,9 @@ class bilibiliClient():
                     tmp = await self._reader.read(num2)
                     try: # 为什么还会出现 utf-8 decode error??????
                         messages = tmp.decode('utf-8')
+                        self.parse_cmd()
                     except Exception:
                         continue
-                    self.parseDanMu(messages)
                     continue
                 elif num in {5, 6, 7}:
                     tmp = await self._reader.read(num2)
@@ -147,6 +147,42 @@ class bilibiliClient():
                 CacheContorl.message_data[danmu] = 0
                 self.log_file_write.write(log)
                 self.log.add(log)
+
+    def parse_cmd(self, message:str):
+        """
+        解析直播间实时消息
+        Keyword arguments:
+        message -- 消息json
+        """
+        try:
+            dic = json.loads(messages)
+        except: # 有些情况会 jsondecode 失败，未细究，可能平台导致
+            return
+        cmd = dic['cmd']
+        if cmd == 'LIVE':
+            print ('直播开始。。。')
+            return
+        if cmd == 'PREPARING':
+            print ('房主准备中。。。')
+            return
+        if cmd == 'SEND_GIFT' and config.TURN_GIFT == 1:
+            GiftName = dic['data']['giftName']
+            GiftUser = dic['data']['uname']
+            Giftrcost = dic['data']['rcost']
+            GiftNum = dic['data']['num']
+            try:
+                print(GiftUser + ' 送出了 ' + str(GiftNum) + ' 个 ' + GiftName)
+            except:
+                pass
+            return
+        if cmd == 'WELCOME' and config.TURN_WELCOME == 1:
+            commentUser = dic['data']['uname']
+            try:
+                print ('欢迎 ' + commentUser + ' 进入房间。。。。')
+            except:
+                pass
+            return
+        return
 
     def dlist_message_push(self):
         while 1:
