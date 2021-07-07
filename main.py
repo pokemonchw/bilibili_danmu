@@ -1,12 +1,14 @@
+#!/usr/bin/python3
+# -*- coding: UTF-8 -*-
 import asyncio
 from bilibiliClient import bilibiliClient
 
 danmuji = bilibiliClient()
 
 tasks = [
-            danmuji.connectServer() ,
-            danmuji.HeartbeatLoop()
-        ]
+    danmuji.connectServer(),
+    danmuji.HeartbeatLoop(),
+]
 loop = asyncio.get_event_loop()
 try:
     loop.run_until_complete(asyncio.wait(tasks))
